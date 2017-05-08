@@ -19,6 +19,8 @@ For each subdirectory which should be processed one source file with the same ba
 exist which can contain meta information:
 * `pages/a.md`       top page for directory a
 * `pages/a/foo.md`   page foo within a
+
+
 The following meta information can be given
 * `page-id`          part of the generated id, if not given the base name of the file
 * `page-order`       give an ordering key for sorting in the current directory level, if not given the `page-id` will be used
