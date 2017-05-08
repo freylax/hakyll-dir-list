@@ -71,6 +71,8 @@ buildTree parentPid (p:ps)  = do
     id' = itemIdentifier $ fst p
     parentPid' = if parentPid == "" then "" else parentPid ++ "-"   
 
+buildTree _ [] = error "buildTree: empty file list"
+
 -- -- | build the tree, the input are only files belonging to this tree
 -- -- | key is the order 
 -- buildTree :: MonadMetadata m => String -> [Iid <- getItemPageId id
