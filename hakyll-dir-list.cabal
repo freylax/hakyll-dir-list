@@ -20,6 +20,9 @@ category:     Web
 build-type:         Simple
 cabal-version:      >= 1.10
 
+extra-source-files:
+        README.md CHANGELOG.md                    
+                    
 library
   exposed-modules:
     Hakyll.Web.Template.DirList
