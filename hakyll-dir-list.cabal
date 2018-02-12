@@ -1,5 +1,22 @@
 name:               hakyll-dir-list
 version:            0.1.1.0
+
+synopsis: Allow Hakyll to create hierarchical menues from directories. 
+
+description:
+            Hakyll extension which supports the creation of hierarchical
+            menus from source  files in a directory structure.
+            Adittionally single page web sites can created by using flattened
+            page id's instead of urls.
+
+author:      Robert Hennig <robert.hennig@freylax.de>
+maintainer:  Robert Hennig <robert.hennig@freylax.de>
+homepage:    http://github.com/freylax/hakyll-dir-list
+bug-reports: http://github.com/freylax/hakyll-dir-list/issues
+license:     BSD3
+license-file: LICENSE
+category:     Web
+                            
 build-type:         Simple
 cabal-version:      >= 1.10
 
