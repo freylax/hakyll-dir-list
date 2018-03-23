@@ -29,13 +29,13 @@ import           Data.Default    (Default (..))
 -- The level count begins with zero. 
 data Configuration = Configuration
   {
-    -- | begin of item tag, default returns "<li>"
+    -- | begin of item tag, default returns '<li>'
     beginItemTag :: Int -> String
-    -- | end of item tag, default returns "</li>"
+    -- | end of item tag, default returns '</li>'
   , endItemTag :: Int -> String
-    -- | begin of collection tag, default returns "<ul>" if level > 0
+    -- | begin of collection tag, default returns '<ul>' if level > 0
   , beginCollectionTag :: Int -> String
-    -- | end of collection tag, default returns "</ul>" if level > 0
+    -- | end of collection tag, default returns '</ul>' if level > 0
   , endCollectionTag :: Int -> String
   }
 
