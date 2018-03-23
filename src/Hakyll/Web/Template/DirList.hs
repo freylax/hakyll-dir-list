@@ -2,21 +2,86 @@
 {-# LANGUAGE TupleSections #-}
 module Hakyll.Web.Template.DirList
        (
-         dirListField
+         Configuration (..)
+       , defaultConfiguration
+       , metadataConfiguration
+       , dirListField
        ) where
 
 --import           Data.Monoid (mappend)
 import           Control.Monad               (liftM)
 import           Data.List                   (sortBy)
 import           Data.Ord                    (comparing)
-import           Hakyll
+import           Hakyll          ( MonadMetadata, Identifier
+                                 , Item, itemIdentifier, field
+                                 , getMetadata, lookupString, listField
+                                 , toFilePath, Metadata, Compiler, Context
+                                 , splitAll)
 import           System.FilePath ( dropExtensions
                                  , splitDirectories
                                  , takeBaseName)
 import           Data.Maybe      ( fromMaybe)
 import qualified Data.Map as M
+import           Data.Default    (Default (..))
 
+-- | Configuration for allowing variation of collection and
+-- item tags in dependency of the hierarchical directory level.
+-- The level count begins with zero. 
+data Configuration = Configuration
+  {
+    -- | begin of item tag, default returns "<li>"
+    beginItemTag :: Int -> String
+    -- | end of item tag, default returns "</li>"
+  , endItemTag :: Int -> String
+    -- | begin of collection tag, default returns "<ul>" if level > 0
+  , beginCollectionTag :: Int -> String
+    -- | end of collection tag, default returns "</ul>" if level > 0
+  , endCollectionTag :: Int -> String
+  }
 
+instance Default Configuration where
+  def = defaultConfiguration
+
+-- | Default configuration for dirListField
+defaultConfiguration :: Configuration
+defaultConfiguration = Configuration
+  { beginItemTag = \_ -> "<li>"
+  , endItemTag = \_ -> "</li>"
+  , beginCollectionTag = \l -> if l > 0 then "<ul>" else ""
+  , endCollectionTag = \l -> if l > 0 then "</ul>" else ""
+  }
+
+-- | Read Configuration from Metadata
+--   the given default Configuration is used
+--   if no coresponding metadata field is found.
+--   The fields are: beginItemTag, endItemTag,
+--   beginCollectionTag, endCollectionTag
+--   These fields can hold a list of tags which are
+--   separated by the value of the field tagDelimiter,
+--   or if not given an ','. The list holds the
+--   tags per level, if level is higher than the
+--   tags in the list the last tag is used.
+--
+metadataConfiguration :: Metadata -> Configuration -> Configuration
+metadataConfiguration md default' =
+  Configuration 
+  ( f "beginItemTag" ( beginItemTag default' ) )
+  ( f "endItemTag"   ( endItemTag default' ) )
+  ( f "beginCollectionTag" ( beginCollectionTag default' ) )
+  ( f "endCollectionTag" ( endCollectionTag default' ) )
+  where
+    del = fromMaybe "," (lookupString "tagDelimiter" md)
+    f :: String -> ( Int -> String ) -> ( Int -> String )
+    f tag df =
+      case lookupString tag md of
+        Nothing -> df
+        Just s -> g ( splitAll del s )
+    g :: [String] -> Int -> String
+    g (x:[]) _ = x
+    g (x:_) 0 = x
+    g (_:xs) l = g xs (l - 1)
+    g [] _ = "<???>" -- this should not happen
+  
 -- | Sort pages alphabetically.
 alphabetical :: MonadMetadata m => [Item a] -> m [Item a]
 alphabetical =
@@ -102,31 +167,41 @@ buildOrderedTreeList parentPid ps = do
 -- |                           pid    btags  etags
 data TreeContext = TreeContext String String String deriving Show
   
-getItemTreeAList :: ItemTree a -> Int -> String -> String -> [(Item a, TreeContext)]
-getItemTreeAList ( ItemTree i [] pid _ ) _ btags etags =
-  [( i, TreeContext pid (btags ++ "<li>") ("</li>" ++ etags))]
-getItemTreeAList ( ItemTree i ts pid _ ) level btags etags =
-  ( i, TreeContext pid (btags ++ "<li>") "")
-  : (getItemTreeListAList (level+1) ("</li>" ++ etags) ts)
+getItemTreeAList :: Configuration -> ItemTree a -> Int
+                 -> String -> String -> [(Item a, TreeContext)]
+getItemTreeAList cfg ( ItemTree i [] pid _ ) level btags etags =
+  [( i, TreeContext pid (btags ++ (beginItemTag cfg) level)
+        ((endItemTag cfg) level ++ etags))]
+getItemTreeAList cfg ( ItemTree i ts pid _ ) level btags etags =
+  ( i, TreeContext pid (btags ++ (beginItemTag cfg) level) "")
+  : (getItemTreeListAList cfg (level+1) ((endItemTag cfg) level ++ etags) ts)
 
+--
+callGetItemTreeListAList :: Configuration -> [ ItemTree a ]
+                         -> [(Item a, TreeContext)]
+callGetItemTreeListAList cfg = getItemTreeListAList cfg 0 ""
 -- 
-getItemTreeListAList :: Int -> String -> [ ItemTree a ] -> [(Item a, TreeContext)]
-getItemTreeListAList _ _ [] = []
-getItemTreeListAList level etags (t:[]) =    -- begin + end
-    getItemTreeAList t level
-    (if level>0 then "<ul>" else "")
-    ((if level>0 then "</ul>" else "") ++ etags)  
-getItemTreeListAList level etags (t:ts) =    -- begin item
-  (getItemTreeAList t level (if level>0 then "<ul>" else "") "")
-  ++ (getItemTreeListAList' level ((if level>0 then "</ul>" else "") ++ etags) ts) 
+getItemTreeListAList :: Configuration -> Int -> String
+                     -> [ ItemTree a ] -> [(Item a, TreeContext)]
+getItemTreeListAList _ _ _ [] = []
+getItemTreeListAList cfg level etags (t:[]) =    -- begin + end
+    getItemTreeAList cfg t level
+    ((beginCollectionTag cfg) level)
+    ((endCollectionTag cfg) level ++ etags)  
+getItemTreeListAList cfg level etags (t:ts) =    -- begin item
+  (getItemTreeAList cfg t level ((beginCollectionTag cfg) level) "")
+  ++ (getItemTreeListAList' cfg level
+       ((endCollectionTag cfg) level ++ etags) ts) 
 
 -- iteration until the end
-getItemTreeListAList' :: Int -> String-> [ ItemTree a ] -> [(Item a, TreeContext)]
-getItemTreeListAList' _ _ [] = []
-getItemTreeListAList' level etags (t:[]) = -- the last item
-  getItemTreeAList t level "" etags 
-getItemTreeListAList' level etags (t:ts) = -- the items in the middle
-  (getItemTreeAList t level "" "") ++ ( getItemTreeListAList' level etags ts)
+getItemTreeListAList' :: Configuration -> Int -> String
+                      -> [ ItemTree a ] -> [(Item a, TreeContext)]
+getItemTreeListAList' _ _ _ [] = []
+getItemTreeListAList' cfg level etags (t:[]) = -- the last item
+  getItemTreeAList cfg t level "" etags 
+getItemTreeListAList' cfg level etags (t:ts) = -- the items in the middle
+  ( getItemTreeAList cfg t level "" "")
+  ++ ( getItemTreeListAList' cfg level etags ts)
                           
 -- metadata: page-id page-order
 -- context:  full-page-id
@@ -175,13 +250,14 @@ getItemPageOrder id' = do
                        directory level, if not given the @page-id@ will be used
 
 -}
-dirListField :: String -> Context a -> Compiler [Item a] -> Context b
-dirListField key c xs = listField key ( c' `mappend` c) pages' 
+dirListField :: Configuration -> String -> Context a
+             -> Compiler [Item a] -> Context b
+dirListField cfg key c xs = listField key ( c' `mappend` c) pages' 
   where
     pages = alphabetical =<< xs
     treeList = (buildOrderedTreeList "") =<<
       map (\ip-> (fst ip, tail . snd $ ip)) <$> itemPath <$> pages
-    aList = (getItemTreeListAList 0 "") <$> treeList
+    aList = callGetItemTreeListAList cfg <$> treeList
     pages' = (map fst) <$> aList        -- the pages in the correct order
     aList' = map (\(item,ct)->(itemIdentifier item,ct)) <$> aList
     idMap  = M.fromList <$> aList'
@@ -195,5 +271,7 @@ dirListField key c xs = listField key ( c' `mappend` c) pages'
       ( field "end-tags"
         ( \i -> ( (\(Just (TreeContext _ _ e))->e)
                   . ( M.lookup (itemIdentifier i) ) ) <$> idMap ) )
-          
-      
+
+
+                      
+                    

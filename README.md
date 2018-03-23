@@ -14,6 +14,7 @@ template function but creates additional context information which can be used i
 * `$begin-tags$` injects `<li>` and `<ul>` tags if apropriate
 * `$end-tags$` contains the corresponding `</li>` and `</ul>` tags
 * `$full-page-id$` is the hyphen seperated path of the page
+* use configuration to get level dependant structuring tags 
 ### Metainformation in the source files
 For each subdirectory which should be processed one source file with the same base name should
 exist which can contain meta information:

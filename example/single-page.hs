@@ -2,7 +2,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE TupleSections #-}
 import           Hakyll
-import           Hakyll.Web.Template.DirList
+import           Hakyll.Web.Template.DirList as DL
 
 --------------------------------------------------------------------------------
 main :: IO ()
@@ -12,19 +12,23 @@ main = hakyll $ do
     match "pages/**.md" $ do
       compile pandocCompiler
 
-    match "templates/index.html" $ compile templateCompiler
+    match ( "templates/*" .&&.
+            complement "templates/index.html" ) $
+      compile templateCompiler
     
-    create ["index.html"] $ do
-      route idRoute
+    match "templates/index.html" $ do
+      route $ constRoute "index.html"
       compile $ do
-        pages <- loadAll "pages/**" 
+        md <- getMetadata =<< getUnderlying
+        pages <- loadAll "pages/**"
         let indexCtx =
-              dirListField "pages" defaultContext (return pages)
+              DL.dirListField
+                (DL.metadataConfiguration md DL.defaultConfiguration)
+                "pages" defaultContext
+                (return pages)
               `mappend` defaultContext
               
-        makeItem ""
-          >>= loadAndApplyTemplate "templates/index.html" indexCtx
+        getResourceBody
+          >>= applyAsTemplate indexCtx
           >>= relativizeUrls
-
---------------------------------------------------------------------------------
 

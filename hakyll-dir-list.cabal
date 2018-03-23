@@ -1,5 +1,5 @@
 name:               hakyll-dir-list
-version:            0.1.1.0
+version:            1.0.0.0
 
 synopsis: Allow Hakyll to create hierarchical menues from directories. 
 
@@ -30,6 +30,7 @@ library
                   , hakyll == 4.11.*
                   , filepath
                   , containers
+                  , data-default
   hs-source-dirs: src
   Ghc-options:    -Wall
   default-language: Haskell2010
