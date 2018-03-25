@@ -33,9 +33,9 @@ data Configuration = Configuration
     beginItemTag :: Int -> String
     -- | end of item tag, default returns '</li>'
   , endItemTag :: Int -> String
-    -- | begin of collection tag, default returns '<ul>' if level > 0
+    -- | begin of collection tag, default returns '<ul>' 
   , beginCollectionTag :: Int -> String
-    -- | end of collection tag, default returns '</ul>' if level > 0
+    -- | end of collection tag, default returns '</ul>' 
   , endCollectionTag :: Int -> String
   }
 
@@ -47,8 +47,8 @@ defaultConfiguration :: Configuration
 defaultConfiguration = Configuration
   { beginItemTag = \_ -> "<li>"
   , endItemTag = \_ -> "</li>"
-  , beginCollectionTag = \l -> if l > 0 then "<ul>" else ""
-  , endCollectionTag = \l -> if l > 0 then "</ul>" else ""
+  , beginCollectionTag = \_ -> "<ul>"
+  , endCollectionTag = \_ -> "</ul>"
   }
 
 -- | Read Configuration from Metadata

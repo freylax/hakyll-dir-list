@@ -9,3 +9,7 @@ title: Releases
 
 ## hakyll-dir-list 1.0.0.0
 - configurable begin and end tags for items and collections
+
+## hakyll-dir-list 1.0.0.1
+- more consistent behaviour of defaultConfiguration,
+  in connection with metadataConfiguration

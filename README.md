@@ -26,6 +26,10 @@ The following meta information can be given
 * `page-id`          part of the generated id, if not given the base name of the file
 * `page-order`       give an ordering key for sorting in the current directory level, if not given the `page-id` will be used
 
+
+For a more fine grained control the tags which are used are configurable
+for each level of the menu.
+
 ## Example
 See the example for an illustration of usage.
 
