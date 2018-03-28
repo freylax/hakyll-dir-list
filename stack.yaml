@@ -1,4 +1,4 @@
-resolver: nightly-2018-01-15
+resolver: lts-11.0
 
 packages:
 - '.'
@@ -6,12 +6,6 @@ packages:
 allow-newer: True
 
 extra-deps:
-  - hakyll-4.11.0.0
-  - binary-0.9.0.0
-  - http-types-0.11
-  - pandoc-2.1
-  - pandoc-citeproc-0.13
-  - QuickCheck-2.11.3
-  - tasty-1.0.0.1
-  - tasty-hunit-0.10.0.1
+  - hakyll-4.12.0.1
+
 

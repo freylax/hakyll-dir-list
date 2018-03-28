@@ -1,5 +1,5 @@
 name:               hakyll-dir-list
-version:            1.0.0.1
+version:            1.0.0.2
 
 synopsis: Allow Hakyll to create hierarchical menues from directories. 
 
@@ -27,7 +27,7 @@ library
   exposed-modules:
     Hakyll.Web.Template.DirList
   build-depends:    base == 4.*
-                  , hakyll == 4.11.*
+                  , hakyll == 4.12.*
                   , filepath
                   , containers
                   , data-default

@@ -13,3 +13,6 @@ title: Releases
 ## hakyll-dir-list 1.0.0.1
 - more consistent behaviour of defaultConfiguration,
   in connection with metadataConfiguration
+
+## hakyll-dir-list 1.0.0.2
+- use lts-11.0 stack resolver
