@@ -4,6 +4,10 @@ title: Releases
 
 # Releases
 
+## hakyll-dir-list 1.0.0.4
+- use a double hyphen in Metadata Configuration to get 
+  an empty tag, this gets no error in YAML parsing
+
 ## hakyll-dir-list 1.0.0.3
 - use a hyphen in Metadata Configuration to get an empty tag
 - use lts-12.7 stack resolver
