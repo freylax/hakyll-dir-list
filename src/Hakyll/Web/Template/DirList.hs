@@ -61,7 +61,7 @@ defaultConfiguration = Configuration
 --   or if not given an ','. The list holds the
 --   tags per level, if level is higher than the
 --   tags in the list the last tag is used.
---
+--   Use a hyphen '-' to get an empty string as 'tag'.
 metadataConfiguration :: Metadata -> Configuration -> Configuration
 metadataConfiguration md default' =
   Configuration 
@@ -77,10 +77,12 @@ metadataConfiguration md default' =
         Nothing -> df
         Just s -> g ( splitAll del s )
     g :: [String] -> Int -> String
-    g (x:[]) _ = x
-    g (x:_) 0 = x
+    g (x:[]) _ = t x
+    g (x:_) 0 = t x
     g (_:xs) l = g xs (l - 1)
     g [] _ = "<???>" -- this should not happen
+    t :: String -> String
+    t x = if x == "-" then "" else x
   
 -- | Sort pages alphabetically.
 alphabetical :: MonadMetadata m => [Item a] -> m [Item a]

@@ -1,11 +1,10 @@
-resolver: lts-11.0
+resolver: lts-12.7
 
 packages:
 - '.'
 
 allow-newer: True
 
-extra-deps:
-  - hakyll-4.12.0.1
+
 
 
